@@ -882,7 +882,7 @@ function AmdAiOverlayBody() {
         title="Where it all came together"
         body="Two modes, one overlay. Direct controls, pinned widgets, and AMD Chat live together in a single panel, everything one tap away, without leaving the session."
         chapterVideo={{
-          src: "/FinalVid.mp4",
+          src: "/FinalVidAMD.mp4",
           chapters: [
             { time: 0, label: "Graphic Optimization" },
             { time: 5, label: "Screen Recording" },
