@@ -7,7 +7,7 @@ import CaseStudySheet from "@/components/CaseStudySheet"
 import CharacterAvatar from "@/components/CharacterAvatar"
 import { CASE_STUDIES } from "@/lib/case-studies"
 import { COLOR, SPACING, RADIUS, TYPE, withAlpha } from "@/lib/v2-tokens"
-import { playV2Click } from "@/lib/v2-sound"
+import { playV2Click, playV2Select } from "@/lib/v2-sound"
 
 const PROJECTS = [
   {
@@ -783,7 +783,7 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   titleColorHover={COLOR.textPrimary}
                   dateColor={COLOR.textTertiary}
                   onCardOpen={openCaseStudy}
-                  onClickSound={playV2Click}
+                  onClickSound={playV2Select}
                 />
               </div>
             ) : (
@@ -796,7 +796,7 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   titleColor={COLOR.textSecondary}
                   titleColorHover={COLOR.textPrimary}
                   dateColor={COLOR.textTertiary}
-                  onClickSound={playV2Click}
+                  onClickSound={playV2Select}
                 />
               </div>
             )}

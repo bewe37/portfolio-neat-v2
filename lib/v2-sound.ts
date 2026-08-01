@@ -37,3 +37,7 @@ export function playV2Sound(name: keyof typeof SPRITE_MAP, volume = 0.5) {
 export function playV2Click(volume = 0.5) {
   playV2Sound("tap", volume)
 }
+
+export function playV2Select(volume = 0.5) {
+  playV2Sound("select", volume)
+}
