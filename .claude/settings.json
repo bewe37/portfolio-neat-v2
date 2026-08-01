@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev > /tmp/next-dev.log 2>&1 & *)",
+      "Bash(git commit -m ' *)",
+      "Bash(ffprobe -v quiet -print_format json -show_streams /Users/macbook/portfolio-neat/public/flower.mp4)",
+      "Bash(ffprobe /Users/macbook/portfolio-neat/public/flower.mp4)",
+      "Bash(ffmpeg -i /Users/macbook/portfolio-neat/public/flower.mp4 -vf \"scale=300:-1\" -frames:v 1 /tmp/flower_frame.png -y)",
+      "Bash(python3 -c \"import cv2; print\\('cv2 ok'\\)\")",
+      "Bash(python3 -c \"from PIL import Image; print\\('PIL ok'\\)\")",
+      "Bash(grep -E \"\\\\.\\(png|jpg|svg|webp\\)$\")",
+      "Bash(python3 -c ' *)",
+      "Bash(npm uninstall *)",
+      "Bash(xargs -I{} basename {})",
+      "Bash(git restore *)",
+      "Bash(git reset *)",
+      "Bash(git -C /Users/macbook/portfolio-neat add app/page.tsx)",
+      "Bash(git -C /Users/macbook/portfolio-neat commit -m ' *)",
+      "Bash(git -C /Users/macbook/portfolio-neat add components/CaseStudyLayout.tsx components/HeroParticles.tsx)",
+      "Bash(git -C /Users/macbook/portfolio-neat checkout components/CaseStudyLayout.tsx)",
+      "Bash(git -C /Users/macbook/portfolio-neat diff app/amd_ai_project/page.tsx)",
+      "Bash(git -C /Users/macbook/portfolio-neat checkout app/amd_ai_project/page.tsx)",
+      "Bash(git -C /Users/macbook/portfolio-neat add -A)",
+      "Bash(git -C /Users/macbook/portfolio-neat restore --staged public/dither-main)",
+      "Bash(git -C /Users/macbook/portfolio-neat restore --staged .claude/settings.json)",
+      "Bash(awk -F: '$2 > 1716')",
+      "Bash(awk 'NR>=1780 && NR<=1810' /Users/macbook/portfolio-neat/components/CaseStudyLayout.tsx)",
+      "Bash(awk 'NR>=1755 && NR<=1785' /Users/macbook/portfolio-neat/components/CaseStudyLayout.tsx)",
+      "Bash(awk 'NR>=1740 && NR<=1770' /Users/macbook/portfolio-neat/components/CaseStudyLayout.tsx)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/Frustrating.png)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  }
+}

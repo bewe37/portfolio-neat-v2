@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "framer-code-components-overrides": {
+      "source": "fredm00n/framerlabs",
+      "sourceType": "github",
+      "computedHash": "096aaed9c19f563608ec81c80f471814c9f923ca87ddd703dd32bf6631be8bf6"
+    }
+  }
+}

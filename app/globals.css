@@ -1,0 +1,498 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('/DepartureMono-1.500/DepartureMono-Regular.woff2') format('woff2'),
+       url('/DepartureMono-1.500/DepartureMono-Regular.woff')  format('woff');
+  font-weight: 400;
+  font-style:  normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Uncut Sans';
+  src: url('/uncut_sans-main/Webfonts/UncutSans-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style:  normal;
+  font-display: swap;
+}
+
+@layer base {
+  ::selection {
+    background: rgb(255, 107, 48) !important;
+    color: #fff !important;
+  }
+}
+
+:root {
+  --font-sans:  'Uncut Sans', sans-serif;
+  --font-serif: var(--font-serif, 'Playfair Display', serif);
+  --bg:          rgb(255,255,255);
+  --footer-bg:   rgb(38,38,38);
+  --footer-dot:  rgba(255,255,255,0.18);
+  --footer-glow: rgba(255,255,255,0.85);
+  --footer-text: rgba(255,255,255,0.88);
+  --footer-text-dim: rgba(255,255,255,0.5);
+  --footer-divider: rgba(255,255,255,0.15);
+  --surface:     rgb(240,240,240);
+  --dot-color:   rgba(0,0,0,0.07);
+  --c-primary:   rgba(10,10,10,0.92);
+  --particle-color: rgba(255,255,255,0.92);
+  --c-high:      rgba(0,0,0,0.78);
+  --c-mid:       rgba(10, 10, 10, 0.65);
+  --c-body:      rgba(0,0,0,0.55);
+  --c-secondary: rgba(0,0,0,0.45);
+  --c-dim:       rgba(0,0,0,0.35);
+  --c-faint:     rgba(0,0,0,0.28);
+  --c-ghost:     rgba(0,0,0,0.18);
+  --divider:     rgba(0,0,0,0.06);
+  --border:      rgba(0,0,0,0.08);
+  --border-mid:  rgba(0,0,0,0.12);
+  --hover-bg:    rgba(0,0,0,0.04);
+  --image-bg:    rgba(0,0,0,0.03);
+  --icon-color:  rgba(0,0,0,0.4);
+}
+
+body.dark {
+  --bg:          rgb(14,13,12);
+  --footer-bg:   rgb(30,30,30);
+  --footer-dot:  rgb(131, 131, 131);
+  --footer-glow: rgba(255,255,255,0.85);
+  --footer-text: rgba(255,255,255,0.88);
+  --footer-text-dim: rgba(255,255,255,0.5);
+  --footer-divider: rgba(255,255,255,0.15);
+  --surface:     rgb(31, 31, 31);
+  --dot-color:   rgba(255,255,255,0.055);
+  --c-primary:   rgba(255,255,255,0.95);
+  --particle-color: rgba(255,255,255,0.92);
+  --c-high:      rgba(255,255,255,0.92);
+  --c-mid:       rgba(255,255,255,0.85);
+  --c-body:      rgba(255,255,255,0.78);
+  --c-secondary: rgba(255,255,255,0.68);
+  --c-dim:       rgba(255,255,255,0.55);
+  --c-faint:     rgba(255,255,255,0.42);
+  --c-ghost:     rgba(255,255,255,0.28);
+  --divider:     rgba(255,255,255,0.07);
+  --border:      rgba(255,255,255,0.09);
+  --border-mid:  rgba(255,255,255,0.14);
+  --hover-bg:    rgba(255,255,255,0.06);
+  --image-bg:    rgba(255,255,255,0.05);
+  --icon-color:  rgba(255,255,255,0.45);
+}
+
+body.sunset {
+  --bg:          rgb(252,247,233);
+  --footer-bg:   rgb(38,24,8);
+  --footer-dot:  rgba(255,200,120,0.2);
+  --footer-text: rgba(255,255,255,0.88);
+  --footer-text-dim: rgba(255,255,255,0.5);
+  --footer-divider: rgba(255,255,255,0.15);
+  --surface:     rgb(247,237,208);
+  --dot-color:   rgba(160,110,20,0.09);
+  --c-primary:   rgba(20,10,0,1.0);
+  --particle-color: rgba(20,10,0,1.0);
+  --c-high:      rgba(20,10,0,1.0);
+  --c-mid:       rgba(20,10,0,0.92);
+  --c-body:      rgba(20,10,0,0.85);
+  --c-secondary: rgba(20,10,0,0.75);
+  --c-dim:       rgba(20,10,0,0.65);
+  --c-faint:     rgba(20,10,0,0.55);
+  --c-ghost:     rgba(44,28,4,0.16);
+  --divider:     rgba(160,110,20,0.10);
+  --border:      rgba(160,110,20,0.15);
+  --border-mid:  rgba(160,110,20,0.22);
+  --hover-bg:    rgba(160,110,20,0.07);
+  --image-bg:    rgba(160,110,20,0.04);
+  --icon-color:  rgba(44,28,4,0.40);
+}
+
+/* Shadow bg: only visible in sunset mode */
+.shadow-bg {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+body.sunset .shadow-bg {
+  opacity: 1;
+}
+
+/* Smooth theme transitions — applied only during the switch, not during hover */
+body.theme-switching,
+body.theme-switching * {
+  transition:
+    background-color 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    color            0.4s  cubic-bezier(0.4, 0, 0.2, 1),
+    border-color     0.4s  cubic-bezier(0.4, 0, 0.2, 1),
+    fill             0.4s  cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Reserves the scrollbar's width whether or not it's actually showing,
+     so toggling document.body.style.overflow (e.g. locking scroll while a
+     modal/sheet is open) never changes the page's visible content width.
+     Without this, removing the scroll lock on close re-introduces the
+     scrollbar and shifts everything left by its width — enough to force
+     Framer Motion's layoutId-based shared-element animations (like the
+     /v2 tab pill) to recalculate their position and visibly snap. */
+  scrollbar-gutter: stable;
+}
+
+body.gallery-open [data-shared-nav],
+body.gallery-open [data-mobile-menu] {
+  display: none !important;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--c-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Hero grid texture (removed) ─────────────────────────── */
+.hero-grid {
+  position: relative;
+  overflow: visible;
+}
+.hero-grid > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Page transition ──────────────────────────────────────── */
+@keyframes page-transition-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.page-transition {
+  animation: page-transition-in 0.3s ease both;
+}
+
+@keyframes fade-up-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: inherit;
+}
+
+/* ── Explore bento grid ──────────────────────────────────── */
+.explore-tile:hover .explore-tile-caption {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+
+/* ── Tamagotchi ───────────────────────────────────────────── */
+.tama-egg {
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+.tama-lcd-grid {
+  background-image:
+    linear-gradient(rgba(33,51,27,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33,51,27,0.05) 1px, transparent 1px);
+  background-size: 2px 2px;
+}
+.tama-glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%);
+}
+.tama-plastic {
+  background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%);
+}
+@keyframes tama-marquee {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+@keyframes tama-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes tama-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+@keyframes tama-sway {
+  0%   { transform: translateY(0px)  rotate(0deg);  }
+  18%  { transform: translateY(-4px) rotate(-6deg); }
+  36%  { transform: translateY(0px)  rotate(0deg);  }
+  54%  { transform: translateY(-3px) rotate(5deg);  }
+  72%  { transform: translateY(-1px) rotate(-2deg); }
+  100% { transform: translateY(0px)  rotate(0deg);  }
+}
+@keyframes tama-float {
+  0%   { transform: translateY(0);     opacity: 1;   }
+  70%  { opacity: 0.5; }
+  100% { transform: translateY(-20px); opacity: 0;   }
+}
+@keyframes tama-jump {
+  0%   { transform: translateY(0);     }
+  20%  { transform: translateY(-14px); }
+  45%  { transform: translateY(-8px);  }
+  65%  { transform: translateY(-12px); }
+  85%  { transform: translateY(-3px);  }
+  100% { transform: translateY(0);     }
+}
+@keyframes tama-sleep {
+  0%, 100% { transform: rotate(6deg) translateY(0);   }
+  50%       { transform: rotate(6deg) translateY(-1px); }
+}
+@keyframes tama-zzz {
+  0%   { transform: translateY(0)    scale(0.6); opacity: 0.9; }
+  100% { transform: translateY(-18px) scale(1.1); opacity: 0;   }
+}
+@keyframes tama-think {
+  0%,90%  { opacity: 0; }
+  45%     { opacity: 1; }
+}
+@keyframes tama-groove {
+  0%   { transform: translateY(0)    rotate(0deg);  }
+  15%  { transform: translateY(-5px) rotate(-6deg); }
+  30%  { transform: translateY(-1px) rotate(0deg);  }
+  45%  { transform: translateY(-5px) rotate(6deg);  }
+  60%  { transform: translateY(-1px) rotate(0deg);  }
+  75%  { transform: translateY(-4px) rotate(-4deg); }
+  90%  { transform: translateY(-1px) rotate(2deg);  }
+  100% { transform: translateY(0)    rotate(0deg);  }
+}
+@keyframes tama-note {
+  0%   { transform: translateY(0)   scale(0.7); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(-14px) scale(1); opacity: 0; }
+}
+
+/* ── End Tamagotchi ───────────────────────────────────────── */
+
+
+@keyframes avatarSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes avatarWiggle {
+  0%   { transform: perspective(300px) rotateZ(0deg)  scale(1.07); }
+  20%  { transform: perspective(300px) rotateZ(-9deg) scale(1.12); }
+  40%  { transform: perspective(300px) rotateZ(7deg)  scale(1.11); }
+  60%  { transform: perspective(300px) rotateZ(-5deg) scale(1.09); }
+  80%  { transform: perspective(300px) rotateZ(3deg)  scale(1.08); }
+  100% { transform: perspective(300px) rotateZ(0deg)  scale(1.07); }
+}
+
+@keyframes avatarRipple {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes shimmerSlide {
+  0%   { left: -120px; opacity: 0; }
+  5%   { opacity: 0.25; }
+  95%  { opacity: 0.25; }
+  100% { left: 110%; opacity: 0; }
+}
+
+/* Mobile hamburger — hidden on desktop */
+.rsp-hamburger { display: none; }
+/* Mobile-only elements — hidden on desktop, shown on mobile */
+.rsp-mobile-only { display: none; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Padding */
+  .rsp-px        { padding-left: 20px !important; padding-right: 20px !important; }
+  /* Chapter video: only the active chapter's label shows on mobile — five don't fit,
+     but leaving every chip blank (previous rule) read as a broken, empty control. */
+  .rsp-chapter-label-hide { display: none !important; }
+  /* Case study body copy: same 16px on every viewport read too large once columns
+     narrow to phone width — one shared step down keeps every paragraph type in sync. */
+  .rsp-cs-body { font-size: 0.9375rem !important; line-height: 1.65 !important; }
+  .rsp-pb        { padding-bottom: 80px !important; }
+
+  /* Grids → single column */
+  .rsp-stack     { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .rsp-stack-sm  { grid-template-columns: 1fr !important; gap: 8px !important; }
+
+  /* About: center tamagotchi below text */
+  .rsp-tama      { display: flex !important; justify-content: center !important; }
+
+  /* About: gallery moves from the top hero spot to just above the footer.
+     All three are direct children of the same flex column, so reordering
+     is just `order` — no JSX restructuring needed. Default (unset) order
+     is 0 for all three, so explicit values are needed on every sibling,
+     not just the one moving. */
+  .rsp-about-gallery { order: 2 !important; margin-top: 0 !important; }
+  .rsp-about-main    { order: 1 !important; }
+  .rsp-about-footer  { order: 3 !important; }
+
+  /* Case study heading */
+  .rsp-cs-h1     { font-size: 1.375rem !important; line-height: 1.2 !important; margin-bottom: 24px !important; }
+
+  /* Hero profile row */
+  .rsp-hero-row  { gap: 12px !important; align-items: center !important; z-index: 1001 !important; }
+
+  /* Experience grid: stack columns */
+  .rsp-exp-row   { grid-template-columns: 1fr !important; gap: 4px !important; padding: 16px 0 !important; }
+  .rsp-exp-period { font-size: 0.75rem !important; margin-top: 2px !important; }
+
+  /* Contact handle text: trim on very small screens */
+  .rsp-handle    { display: none !important; }
+
+  /* Footer */
+  .rsp-footer-inner  { padding: 36px 24px 44px !important; min-height: 320px !important; }
+  .rsp-footer-bottom { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+  .rsp-footer-grid   { grid-template-columns: 1fr !important; gap: 28px !important; align-items: flex-start !important; }
+  .rsp-footer-grid > div:nth-child(2) { align-items: flex-start !important; }
+  .rsp-footer-grid > div:last-child   { justify-content: flex-start !important; }
+
+  /* Companion — center at bottom on mobile */
+  .companion-anchor { right: 50% !important; transform: translateX(50%) !important; }
+
+  /* Section spec strip: let items wrap without dividers looking odd */
+  .rsp-spec-item { border-right: none !important; padding-right: 0 !important; margin-right: 24px !important; }
+
+  /* Hide arrows in folder carousel on touch */
+  .rsp-hide      { display: none !important; }
+
+  /* Project folder: swap carousel for card list */
+  .rsp-hide-mobile  { display: none !important; }
+  .hero-tagline { pointer-events: none !important; cursor: default !important; }
+  .hero-tagline .hero-beautiful { pointer-events: auto !important; cursor: pointer !important; }
+  .project-badge-img { height: 16px !important; }
+  .rsp-mobile-only  { display: flex !important; }
+  .rsp-show-mobile { display: flex !important; flex-direction: column !important; }
+
+  /* Explore layout: stack bio above the bento grid, collapse grid to a single column */
+  .rsp-explore-row  { flex-direction: column !important; gap: 32px !important; }
+  .rsp-explore-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(5, minmax(220px, auto)) !important;
+    grid-template-areas:
+      "wide" "top-right-a" "top-right-b" "bottom-a" "bottom-b" !important;
+    aspect-ratio: unset !important;
+    gap: 12px !important;
+  }
+  .rsp-show-mobile-grid { display: grid !important; }
+
+  /* Mobile hamburger menu button */
+  .rsp-hamburger { display: flex !important; }
+  .rsp-hero-row  { justify-content: flex-start !important; }
+
+  /* Accordion: swap to mobile carousel */
+  .rsp-accordion-desktop { display: none !important; }
+  .rsp-accordion-mobile  { display: block !important; }
+
+  /* Multi-highlight: swap grid for carousel */
+  .rsp-mh-desktop { display: none !important; }
+  .rsp-mh-mobile  { display: flex !important; flex-direction: column; gap: 12px; }
+
+  /* Photo gallery: swap polaroid for simple grid */
+  .rsp-gallery-desktop { display: none !important; }
+  .rsp-gallery-mobile  { display: block !important; }
+
+  /* Hero bottom: show mobile bio+arrow, hide desktop versions */
+  .rsp-hero-bottom-mobile  { display: flex !important; }
+  .rsp-hero-arrow-desktop  { display: none !important; }
+  .rsp-hero-bio-desktop    { display: none !important; }
+
+  /* Experience: company left + role right on same row, then period + desc stacked */
+  .rsp-exp-item {
+    grid-template-areas: "company role" "period period" "desc desc" !important;
+    grid-template-columns: 1fr auto !important;
+    column-gap: 12px !important;
+  }
+  .rsp-exp-role { text-align: right !important; }
+  .rsp-exp-desc { grid-area: desc !important; }
+
+  /* Case study: collapse sidebar grid + show mobile back button */
+  .rsp-cs-grid       { display: block !important; padding: 0 20px !important; }
+  .rsp-toc-sidebar   { display: none !important; }
+  .rsp-back-mobile   { display: flex !important; }
+  .rsp-cs-main       { padding-top: 80px !important; }
+  .project-badge     { opacity: 1 !important; transform: translateY(0) !important; }
+  .rsp-specs span    { font-size: 0.75rem !important; }
+
+  /* Scale project folders down on mobile for breathing room */
+  .rsp-project-card-bg {
+    padding-top: 90px !important;
+  }
+  .rsp-folder-stage {
+    transform: scale(0.80) !important;
+    transform-origin: top center;
+    margin-bottom: -70px !important;
+  }
+
+  /* Show arrow indicator on mobile folder cards */
+  .rsp-folder-arrow { display: flex !important; }
+
+  /* Extra spacing between about-me text and tamagotchi on mobile */
+  .rsp-tama-top { margin-top: 52px !important; }
+
+  /* Sticky note: un-stick and un-rotate when stacked below image */
+  .rsp-stack > div[style*="sticky"] {
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+  }
+}
+
+/* Sticker toggle button — hover turns icon orange */
+.sticker-toggle-btn { color: var(--c-dim); transition: color 0.15s; box-shadow: 0 1px 4px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.05); }
+.sticker-toggle-btn:hover { color: rgb(255,107,48); }
+
+/* Sticker palette — light mode shadow */
+.sticker-palette {
+  box-shadow: 0px 0px 0px 1px rgba(0,0,0,0.06), 0px 1px 2px -1px rgba(0,0,0,0.06), 0px 2px 4px 0px rgba(0,0,0,0.04) !important;
+}
+body.dark .sticker-palette,
+body.sunset .sticker-palette {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+
+/* Sticky note — light + dark shared */
+.sticky-note {
+  background:  #FFE234;
+  border:      1px solid #e6cc00;
+  box-shadow:  0 4px 18px rgba(160,130,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
+}
+.sticky-note-tape {
+  background:    #f0d000;
+  border-bottom: 1px solid #d4b800;
+}
+.sticky-note-label { color: rgba(30,22,0,0.5); }
+.sticky-note-body  { color: rgba(20,15,0,0.85); }
+
+/* Sticky note — dark mode */
+body.dark .sticky-note {
+  background:  #e9e9e9;
+  border:      1px solid #e6cc00;
+  box-shadow:  0 4px 18px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+}
+body.dark .sticky-note-tape {
+  background:    #f0d000;
+  border-bottom: 1px solid #d4b800;
+}
+body.dark .sticky-note-label { color: rgba(30,22,0,0.5); }
+body.dark .sticky-note-body  { color: rgba(20,15,0,0.85); }
+
+/* Carousel buttons */
+.carousel-btn { transition: background 0.15s ease, transform 0.15s ease; }
+.carousel-btn:hover { background: rgba(255, 255, 255, 0.121) !important; transform: translateY(-50%) scale(1.1); }

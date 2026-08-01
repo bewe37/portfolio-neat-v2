@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# build
+dist/
+build/
+*.tsbuildinfo
+
+# env files
+.env
+.env.*
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ide / editor
+.cursor/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
