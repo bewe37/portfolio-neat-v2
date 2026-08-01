@@ -137,11 +137,17 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
   // land inside the dialog instead of it opening silently behind them),
   // and returns to whatever triggered it on close — the element that
   // opens the sheet is otherwise left behind with no way back to it.
+  // preventScroll on both calls: the trigger card can sit anywhere in the
+  // project grid's own scroll container (further down for later cards),
+  // and a plain .focus() scrolls that container to bring the target back
+  // into view — visible as the whole homepage jumping on close, worst for
+  // cards lower in the grid. The sheet only ever opens/closes from a click
+  // that's already on screen, so there's never a real need to scroll here.
   useEffect(() => {
     triggerRef.current = document.activeElement
-    sheetRef.current?.focus()
+    sheetRef.current?.focus({ preventScroll: true })
     return () => {
-      if (triggerRef.current instanceof HTMLElement) triggerRef.current.focus()
+      if (triggerRef.current instanceof HTMLElement) triggerRef.current.focus({ preventScroll: true })
     }
   }, [])
 
@@ -246,7 +252,12 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
               touchAction override here: this area needs the browser's
               normal scroll and text-selection gestures, which is exactly
               why drag-to-dismiss is only ever started from the handle
-              below, not from anywhere in this div. */}
+              below, not from anywhere in this div. Clipped to the sheet's
+              own rounded top corners via the outer motion.div's
+              overflow:hidden above — a border-radius on this element itself
+              wouldn't reliably bend its own native scrollbar in every
+              browser, but the ancestor's overflow clip does hide whatever
+              of the scrollbar would otherwise poke past the curve. */}
           <div
             className="cs-sheet-body"
             style={{

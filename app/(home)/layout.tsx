@@ -6,7 +6,7 @@ import ProjectCards, { type Project } from "@/components/ProjectCards"
 import CaseStudySheet from "@/components/CaseStudySheet"
 import CharacterAvatar from "@/components/CharacterAvatar"
 import { SocialLinkGroup } from "@/components/SocialLinkGroup"
-import { CASE_STUDIES } from "@/lib/case-studies"
+import { CASE_STUDIES, CaseStudyNavContext } from "@/lib/case-studies"
 import { COLOR, SPACING, RADIUS, TYPE, withAlpha } from "@/lib/v2-tokens"
 import { playV2Click, playV2Select } from "@/lib/v2-sound"
 
@@ -107,10 +107,10 @@ const VIBE_PROJECTS = [
 
 type Tab = "work" | "playground"
 
-// Inline company credit — a thin underline sits at rest in a subtle tone;
-// on hover a second line fills in left-to-right like a progress bar,
-// scaling from the anchor's left edge into the primary text color. Opens
-// the real company site in a new tab.
+// Inline company credit — a rounded pill background, a shade darker on
+// hover. Opens the real company site in a new tab. Negative margin cancels
+// the padding visually so the word still sits inline with surrounding text
+// at the same baseline rhythm, just with a highlight behind it.
 function CompanyLink({ href, children }: { href: string; children: React.ReactNode }) {
   const [hovered, setHovered] = useState(false)
   return (
@@ -122,28 +122,26 @@ function CompanyLink({ href, children }: { href: string; children: React.ReactNo
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: "relative",
         display: "inline-block",
-        color: "inherit",
+        margin: "0 -1px",
+        padding: "0px 4px",
+        borderRadius: 4,
+        fontWeight: 500,
+        color: hovered ? COLOR.textPrimary : "inherit",
         textDecoration: "none",
+        background: hovered ? COLOR.border : "#EDEDED",
+        transition: "background 0.15s ease, color 0.15s ease",
       }}
     >
       {children}
-      <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: withAlpha(COLOR.textPrimary, 0.1) }} />
-      <motion.span
-        initial={false}
-        animate={{ scaleX: hovered ? 1 : 0 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: COLOR.textPrimary, transformOrigin: "left", scaleX: 0 }}
-      />
     </a>
   )
 }
 
-// Same underline treatment as CompanyLink, but not a link — hovering turns
-// the word (and its underline) into the character avatar's continuously
-// hue-rotating rainbow, and also forces the actual mascot in the bio header
-// to spin via onHoverChange, so both animate together.
+// Same pill treatment as CompanyLink, but not a link — hovering turns the
+// word into the character avatar's continuously hue-rotating rainbow, and
+// also forces the actual mascot in the bio header to spin via
+// onHoverChange, so both animate together.
 function RainbowWord({ children, onHoverChange }: { children: React.ReactNode; onHoverChange: (hovered: boolean) => void }) {
   const [hovered, setHovered] = useState(false)
 
@@ -153,30 +151,23 @@ function RainbowWord({ children, onHoverChange }: { children: React.ReactNode; o
   }
 
   return (
-    // inline-block (matching CompanyLink) so the absolutely-positioned
-    // underline lines position correctly. Any trailing punctuation is
-    // passed in as part of children (not left outside the span) so the
-    // line-breaking algorithm can't orphan it from the word.
     <span
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       className={hovered ? "v2-rainbow-word-active" : undefined}
       style={{
-        position: "relative",
         display: "inline-block",
+        margin: "0 -1px",
+        padding: "0px 4px",
+        borderRadius: 4,
+        fontWeight: 500,
         color: "inherit",
         cursor: "default",
+        background: hovered ? COLOR.border : "#EDEDED",
+        transition: hovered ? undefined : "background 0.15s ease",
       }}
     >
       {children}
-      <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: withAlpha(COLOR.textPrimary, 0.1) }} />
-      <motion.span
-        initial={false}
-        animate={{ scaleX: hovered ? 1 : 0 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className={hovered ? "v2-rainbow-word-active-line" : undefined}
-        style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: COLOR.textPrimary, transformOrigin: "left", scaleX: 0 }}
-      />
     </span>
   )
 }
@@ -323,13 +314,6 @@ const V2_RESPONSIVE_STYLES = `
   .v2-rainbow-word-active {
     animation: v2-rainbow-word-spin 2.5s linear infinite;
   }
-  @keyframes v2-rainbow-line-spin {
-    from { background: #5451D9; filter: hue-rotate(0deg) saturate(1.4); }
-    to { background: #5451D9; filter: hue-rotate(360deg) saturate(1.4); }
-  }
-  .v2-rainbow-word-active-line {
-    animation: v2-rainbow-line-spin 2.5s linear infinite;
-  }
 `
 
 function V2ResponsiveStyles() {
@@ -383,6 +367,16 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
     setOpenProject(project)
     window.history.pushState(null, "", project.href)
   }, [])
+
+  // Lets a case study's own body content (e.g. the "Oh, and there's more"
+  // cross-link at the end of one case study, pointing at another) swap the
+  // open sheet in place — same effect as openCaseStudy, just looked up by
+  // href since the content only knows the target path, not the Project
+  // object itself. Provided to lib/case-studies.tsx via CaseStudyNavContext.
+  const openCaseStudyByHref = useCallback((href: string) => {
+    const project = PROJECTS.find(p => p.href === href)
+    if (project) openCaseStudy(project)
+  }, [openCaseStudy])
 
   const closeCaseStudy = useCallback(() => {
     setOpenProject(null)
@@ -445,10 +439,10 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
           <div style={{ display: "flex", flexDirection: "column", gap: SPACING.md, width: "fit-content" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: SPACING.xl }}>
               <p style={{ margin: 0, fontFamily: TYPE.fontFamily, fontSize: TYPE.size.body, letterSpacing: TYPE.letterSpacing, lineHeight: "170%", color: COLOR.textSecondary }}>
-                I&apos;m a product designer based in Toronto. Most of what I obsess over is how software feels to use, the small stuff that turns something functional into something people actually <RainbowWord onHoverChange={setEnjoyHovered}>enjoy.</RainbowWord>
+                I&apos;m a product designer based in Toronto. Most of what I obsess over is how software feels to use, the small stuff that turns something functional into something people actually <RainbowWord onHoverChange={setEnjoyHovered}>enjoy</RainbowWord>
               </p>
               <p style={{ margin: 0, fontFamily: TYPE.fontFamily, fontSize: TYPE.size.body, letterSpacing: TYPE.letterSpacing, lineHeight: "170%", color: COLOR.textSecondary }}>
-                Previously worked on AI integration at <CompanyLink href="https://www.amd.com">AMD</CompanyLink>, and&nbsp;streamlined a data integration platform at <CompanyLink href="https://www.safe.com">Safe&nbsp;Software</CompanyLink>.
+                Previously worked on AI integration at <CompanyLink href="https://www.amd.com">AMD</CompanyLink> and&nbsp;streamlined a data integration platform at <CompanyLink href="https://www.safe.com">Safe&nbsp;Software</CompanyLink>
               </p>
             </div>
 
@@ -638,7 +632,9 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
       <V2ResponsiveStyles />
 
       {activeCaseStudy && (
-        <CaseStudySheet content={activeCaseStudy} onClose={closeCaseStudy} />
+        <CaseStudyNavContext.Provider value={openCaseStudyByHref}>
+          <CaseStudySheet content={activeCaseStudy} onClose={closeCaseStudy} />
+        </CaseStudyNavContext.Provider>
       )}
 
       {children}

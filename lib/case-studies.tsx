@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { motion } from "framer-motion"
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { COLOR, TYPE } from "@/lib/v2-tokens"
 import { playV2Click } from "@/lib/v2-sound"
 import { useLazyVideo } from "@/lib/use-lazy-video"
@@ -9,6 +9,14 @@ import { useLazyVideo } from "@/lib/use-lazy-video"
 export interface CaseStudyContent {
   Body: () => React.ReactElement
 }
+
+// Lets a case study's own body content open a *different* case study's
+// sheet in place (e.g. a cross-link at the end of one case study to
+// another), without threading a callback prop through every Body function.
+// V2Layout provides the real implementation (it owns the sheet's open
+// state); the no-op default only matters if a Body ever renders outside
+// that provider, which doesn't happen in practice.
+export const CaseStudyNavContext = createContext<(href: string) => void>(() => {})
 
 // Clean, quiet rendition: no boxed media chrome, no medium/semibold text
 // weights, small restrained type scale throughout — everything sits at
@@ -193,6 +201,72 @@ function Divider({ text }: { text?: string }) {
       <div style={{ flex: 1, height: 1, background: COLOR.border }} />
       {text && <span style={{ fontFamily: TYPE.fontFamily, fontSize: 13, fontWeight: 400, color: COLOR.textTertiary, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>{text}</span>}
       <div style={{ flex: 1, height: 1, background: COLOR.border }} />
+    </div>
+  )
+}
+
+// Wraps a single piece of media (e.g. the image in a cross-link "Oh, and
+// there's more" section) so hovering shows a small "Click me" tooltip that
+// tracks the cursor, and clicking opens a different case study's sheet in
+// place, via CaseStudyNavContext. Position is relative to this element (not
+// the page), updated on every mousemove — cheap here since it's only live
+// while actually hovering one small, static image.
+function NavigableCard({ href, children }: { href: string; children: React.ReactNode }) {
+  const [hovered, setHovered] = useState(false)
+  const [pos, setPos] = useState({ x: 0, y: 0 })
+  const navigate = useContext(CaseStudyNavContext)
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => { playV2Click(); navigate(href) }}
+      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { playV2Click(); navigate(href) } }}
+      onMouseEnter={e => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+        setHovered(true)
+      }}
+      onMouseLeave={() => setHovered(false)}
+      onMouseMove={e => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+      }}
+      style={{ position: "relative", cursor: hovered ? "none" : "pointer" }}
+    >
+      {children}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, left: pos.x, top: pos.y }}
+            animate={{ opacity: 1, scale: 1, left: pos.x, top: pos.y }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{
+              opacity: { duration: 0.15, ease: [0.23, 1, 0.32, 1] },
+              scale: { duration: 0.15, ease: [0.23, 1, 0.32, 1] },
+              left: { duration: 0.1, ease: "linear" },
+              top: { duration: 0.1, ease: "linear" },
+            }}
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              transform: "translate(16px, -50%)",
+              padding: "5px 9px",
+              borderRadius: 6,
+              background: COLOR.accentTo,
+              color: "#fff",
+              fontFamily: TYPE.fontFamily,
+              fontSize: 12,
+              fontWeight: 400,
+              letterSpacing: "-0.01em",
+              pointerEvents: "none",
+              boxShadow: "0 4px 12px -2px rgba(0,0,0,0.2)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Click me
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -512,6 +586,7 @@ function Section({
   trailingMedia,
   trailingMediaLabels,
   trailingMediaSideBySide,
+  mediaWrapper,
 }: {
   id?: string
   label: string
@@ -534,10 +609,19 @@ function Section({
   trailingMediaLabels?: string[]
   // Render trailingMedia as a row instead of stacked.
   trailingMediaSideBySide?: boolean
+  // Wraps just the rendered `media` block (not the whole section) — e.g. a
+  // NavigableCard around a cross-link section's image only, without also
+  // making the label/title/body text part of the hover/click target.
+  mediaWrapper?: (mediaEl: React.ReactNode) => React.ReactNode
 }) {
   const hasMedia = !!media?.length
   const hasTrailingMedia = !!trailingMedia?.length
   const hasBelow = hasMedia || !!accordion || !!highlights || !!chapterVideo
+  const mediaEl = hasMedia
+    ? (mediaLabels
+        ? <LabeledMediaGrid items={media!} labels={mediaLabels} stack={stackMedia} />
+        : <MediaGrid items={media!} />)
+    : null
   return (
     <>
       {dividerBefore && <Divider text={dividerText} />}
@@ -547,12 +631,11 @@ function Section({
         {body && <SectionBody marginBottom={hasMedia || highlights ? 24 : 0}>{body}</SectionBody>}
         {hmw && <HmwCallout text={hmw} />}
         {chapterVideo && <div style={{ marginTop: 24 }}><ChapterVideo {...chapterVideo} /></div>}
-        {hasMedia && !mediaLabels && <MediaGrid items={media!} />}
-        {hasMedia && mediaLabels && <LabeledMediaGrid items={media!} labels={mediaLabels} stack={stackMedia} />}
+        {mediaEl && (mediaWrapper ? mediaWrapper(mediaEl) : mediaEl)}
         {accordion && <div style={{ marginTop: body || hasMedia ? 24 : 0 }}><Accordion items={accordion} /></div>}
         {highlights && <HighlightRow items={highlights} marginTop={body || hasMedia ? 24 : 0} />}
         {hasTrailingMedia && (
-          <div style={{ marginTop: 24 }}>
+          <div style={{ marginTop: 12 }}>
             {trailingMediaSideBySide || trailingMediaLabels
               ? <LabeledMediaGrid items={trailingMedia!} labels={trailingMediaLabels} />
               : <MediaGrid items={trailingMedia!} />}
@@ -804,7 +887,6 @@ function AmdAiOverlayBody() {
         body="I redesigned the overlay from a passive metrics display into a surface users could actually control, with an AI chat that reads live hardware data, a pinnable widget panel, and a dedicated in-session mode built for the pace of the moment."
         media={["/AMDThumbnailTop.png"]}
         trailingMedia={["/ChatDemoTop.mp4", "/InGameDemoTop.mp4"]}
-        trailingMediaLabels={["AI chat", "In-session mode"]}
         trailingMediaSideBySide
       />
 
@@ -909,6 +991,7 @@ function AmdAiOverlayBody() {
         title="The Design System That Kept AMD's Team Aligned"
         body="Another big part of this internship was building the design system from the ground up, the foundation that made the entire redesign possible."
         media={["/DSHighlight.png"]}
+        mediaWrapper={media => <NavigableCard href="/amd_project">{media}</NavigableCard>}
       />
     </Page>
   )
@@ -1004,6 +1087,7 @@ function AmdDesignSystemBody() {
         title="Rethinking the Overlay as a Control Surface"
         body="The design system was built to support this major redesign initiative! A full redesign of the AMD Software overlay, turning a read-only metrics display into something users could actually act on."
         media={["/DSHighlight.png"]}
+        mediaWrapper={media => <NavigableCard href="/amd_ai_project">{media}</NavigableCard>}
       />
     </Page>
   )
