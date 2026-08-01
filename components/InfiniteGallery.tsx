@@ -158,17 +158,21 @@ export function GalleryCanvas({
 
     const dpr = window.devicePixelRatio || 1
 
-    // WebGL canvas stays at full window size — never resized (resizing resets WebGL context)
-    canvas.width  = Math.round(window.innerWidth  * dpr)
-    canvas.height = Math.round(window.innerHeight * dpr)
-    gl.viewport(0, 0, canvas.width, canvas.height)
-
-    // W/H track the actual CSS rendered size for grid layout — updated without touching canvas
+    // WebGL canvas backing store matches the element's actual rendered box
+    // (not the full window) — a boxed /about card is a small fraction of
+    // the viewport, so sizing the drawing buffer to window.innerWidth/
+    // innerHeight there was allocating and rendering ~10-20x more pixels
+    // than ever visible, every frame. Falls back to window size only if
+    // the element hasn't been laid out yet (rect is still 0).
     const initRect = canvas.getBoundingClientRect()
     let W = initRect.width  > 0 ? initRect.width  : window.innerWidth
     let H = initRect.height > 0 ? initRect.height : window.innerHeight
-    offscreen.width  = Math.round(W * dpr)
-    offscreen.height = Math.round(H * dpr)
+    canvas.width  = Math.round(W * dpr)
+    canvas.height = Math.round(H * dpr)
+    gl.viewport(0, 0, canvas.width, canvas.height)
+
+    offscreen.width  = canvas.width
+    offscreen.height = canvas.height
     let texW = offscreen.width, texH = offscreen.height
 
     function syncSize() {
@@ -178,6 +182,13 @@ export function GalleryCanvas({
       const newW = Math.round(W * dpr), newH = Math.round(H * dpr)
       offscreen.width  = newW
       offscreen.height = newH
+      // Keep the WebGL backing store in step with the real box size too.
+      // Setting canvas.width/height clears that buffer's pixel contents,
+      // but not the GL context/program/textures — harmless here since the
+      // loop below repaints the whole frame from the offscreen canvas
+      // unconditionally right after any resize.
+      canvas!.width  = newW
+      canvas!.height = newH
       gl!.viewport(0, 0, canvas!.width, canvas!.height)
       // Reallocate texture if offscreen size changed
       if (newW !== texW || newH !== texH) {

@@ -248,6 +248,7 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
               why drag-to-dismiss is only ever started from the handle
               below, not from anywhere in this div. */}
           <div
+            className="cs-sheet-body"
             style={{
               height: "100%",
               overflowY: "auto",
@@ -290,7 +291,10 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
               affordance on sight, especially on desktop where there's
               nothing to drag with a mouse in the first place. Sits above
               the drag handle's own z-index so it stays clickable even
-              though it's within the handle row's height. */}
+              though it's within the handle row's height. Hidden on mobile
+              (see .cs-close-btn below) — there, the handle is an obvious,
+              discoverable swipe-to-dismiss affordance on its own, and the
+              button was crowding the top of the content right below it. */}
           <button
             onClick={() => { playV2Click(); requestClose() }}
             aria-label="Close case study"
@@ -324,6 +328,17 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
       <style>{`
         .cs-drag-handle-row:hover .cs-drag-handle { transform: scaleX(1.15) scaleY(1.5); }
         .cs-close-btn:hover { background: ${withAlpha(COLOR.textPrimary, 0.12)}; }
+
+        @media (max-width: 768px) {
+          /* Extra clearance below the drag handle so the case study's own
+             top content (hero image/interactive demo) doesn't start right
+             at the handle. .cs-page's own mobile rule (see
+             PAGE_RESPONSIVE_STYLES in lib/case-studies.tsx) actually drops
+             top padding to 24px at this width — sized for the standalone
+             page, which has no drag handle overlapping its top edge. */
+          .cs-sheet-body .cs-page { padding-top: 48px !important; }
+          .cs-close-btn { display: none !important; }
+        }
       `}</style>
     </div>,
     document.body
