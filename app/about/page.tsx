@@ -5,6 +5,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 import { COLOR, RADIUS, SPACING, TYPE } from "@/lib/v2-tokens"
 import { playV2Click } from "@/lib/v2-sound"
+import { SocialLinkGroup } from "@/components/SocialLinkGroup"
 
 const GalleryCanvas = dynamic(
   () => import("@/components/InfiniteGallery").then(m => m.GalleryCanvas),
@@ -80,21 +81,23 @@ export default function V2AboutPage() {
         style={{
           display: "flex",
           alignItems: "stretch",
-          gap: SPACING.xxxl,
+          // Matches the homepage's bio-to-content gap so the split sits at
+          // the same place on screen when navigating between / and /about.
+          gap: "clamp(56px, 4.5vw, 104px)",
           width: "100%",
           height: "100%",
         }}
       >
         {/* Left — bio, ported from the current /about page. Width matches
-            the homepage's bio column (320px) so the layout doesn't shift
+            the homepage's bio column (340px) so the layout doesn't shift
             when navigating between /v2 and /v2/about. This column scrolls
             internally (the bio is taller than the viewport) while the
             gallery on the right stays fixed full-height, mirroring the
             homepage's split-scroll pattern. */}
         <div
-          className="rsp-v2-about-bio-scroll"
+          className="rsp-v2-about-bio-col"
           style={{
-            width: 320,
+            width: 340,
             flexShrink: 0,
             height: "100%",
             display: "flex",
@@ -184,7 +187,7 @@ export default function V2AboutPage() {
                       {exp.role}
                     </span>
                   </div>
-                  <span style={{ fontFamily: TYPE.fontFamily, fontSize: 12, fontWeight: 400, color: COLOR.textFaint, letterSpacing: TYPE.letterSpacing, whiteSpace: "nowrap", flexShrink: 0 }}>
+                  <span style={{ fontFamily: TYPE.fontFamily, fontSize: TYPE.size.label, fontWeight: 400, color: COLOR.textFaint, letterSpacing: TYPE.letterSpacing, whiteSpace: "nowrap", flexShrink: 0 }}>
                     {exp.period}
                   </span>
                 </div>
@@ -195,7 +198,11 @@ export default function V2AboutPage() {
 
         {/* Footer — sleep line + socials, pinned to the bottom of the bio
             column (not part of the scrollable area above), same content as
-            the homepage's. */}
+            the homepage's. Stays nested in bio-col on desktop (so it sits
+            under the bio, sharing its 340px column); on mobile, bio-col
+            switches to display:contents so this becomes a direct flex item
+            of the row and can be reordered after the gallery on its own
+            (see .rsp-v2-about-footer order below). */}
         <div
           className="rsp-v2-about-footer"
           style={{
@@ -210,18 +217,14 @@ export default function V2AboutPage() {
           <p style={{ margin: 0, fontFamily: TYPE.fontFamily, fontSize: TYPE.size.label, letterSpacing: TYPE.letterSpacing, lineHeight: "170%", color: COLOR.textTertiary }}>
             Sleep is a design constraint. Available for hire if you catch me awake.
           </p>
-          <div style={{ display: "flex", gap: SPACING.xxl, marginTop: SPACING.xs, alignSelf: "stretch" }}>
-            <div style={{ display: "flex", gap: SPACING.lg }}>
-              <a href="https://twitter.com/gbryanwt" target="_blank" rel="noopener noreferrer" className="v2-social-link" style={{ fontFamily: TYPE.fontFamily, fontSize: TYPE.size.label, letterSpacing: TYPE.letterSpacing, color: COLOR.textTertiary, textDecoration: "none", transition: "color 0.15s ease" }}>
-                X
-              </a>
-              <a href="https://linkedin.com/in/gbryanw" target="_blank" rel="noopener noreferrer" className="v2-social-link" style={{ fontFamily: TYPE.fontFamily, fontSize: TYPE.size.label, letterSpacing: TYPE.letterSpacing, color: COLOR.textTertiary, textDecoration: "none", transition: "color 0.15s ease" }}>
-                LinkedIn
-              </a>
-              <a href="mailto:bryanwinata112@gmail.com" className="v2-social-link" style={{ fontFamily: TYPE.fontFamily, fontSize: TYPE.size.label, letterSpacing: TYPE.letterSpacing, color: COLOR.textTertiary, textDecoration: "none", transition: "color 0.15s ease" }}>
-                Email
-              </a>
-            </div>
+          <div style={{ display: "flex", alignItems: "center", gap: SPACING.xxl, marginTop: SPACING.xs, alignSelf: "stretch" }}>
+            <SocialLinkGroup
+              items={[
+                { href: "https://twitter.com/gbryanwt", label: "X", tooltip: "@gbryanwt" },
+                { href: "https://linkedin.com/in/gbryanw", label: "LinkedIn", tooltip: "/in/gbryanw" },
+                { href: "mailto:bryanwinata112@gmail.com", label: "Email", tooltip: "bryanwinata112@gmail.com", external: false },
+              ]}
+            />
             <p style={{ margin: 0, flex: 1, fontFamily: TYPE.fontFamily, fontSize: TYPE.size.label, letterSpacing: TYPE.letterSpacing, color: COLOR.textFaint }}>
               © 2026 Georgius Bryan
             </p>
@@ -260,16 +263,24 @@ export default function V2AboutPage() {
              naturally instead, like /v2's own mobile fallback. */
           .rsp-v2-about-page { height: auto !important; overflow: visible !important; }
           .rsp-v2-about-row { flex-direction: column !important; height: auto !important; gap: 0 !important; }
-          .rsp-v2-about-row > div { width: 100% !important; height: auto !important; overflow: visible !important; }
-          .rsp-v2-about-bio-scroll { overflow-y: visible !important; }
+          .rsp-v2-about-row > div, .rsp-v2-about-row .rsp-v2-about-bio, .rsp-v2-about-row .rsp-v2-about-footer { width: 100% !important; height: auto !important; overflow: visible !important; }
+          /* bio-col unwraps into the row so its two children (bio, footer)
+             become independently orderable flex items alongside gallery —
+             gallery reads first on mobile, footer last. display:contents
+             keeps bio-col in the DOM (so > div here still selects it, which
+             is why the wider selector above is needed for its children) but
+             removes it from the box tree, so bio/footer/gallery all
+             actually flex-lay-out as if bio-col weren't there. */
+          .rsp-v2-about-bio-col { display: contents !important; }
           /* Both stacked sections get matching left/right padding once the
              two-column layout collapses. */
-          .rsp-v2-about-bio { padding: ${SPACING.lg}px ${SPACING.lg}px 0 ${SPACING.lg}px !important; }
-          .rsp-v2-about-footer { padding: ${SPACING.xl}px ${SPACING.lg}px ${SPACING.xxxl}px ${SPACING.lg}px !important; }
-          .rsp-v2-about-gallery { padding: 0 ${SPACING.lg}px ${SPACING.xxxl}px ${SPACING.lg}px !important; height: 70vh !important; }
+          .rsp-v2-about-bio { order: 1; overflow-y: visible !important; padding: ${SPACING.lg}px ${SPACING.lg}px 0 ${SPACING.lg}px !important; }
+          .rsp-v2-about-gallery { order: 2; padding: ${SPACING.xl}px ${SPACING.lg}px ${SPACING.xxxl}px ${SPACING.lg}px !important; height: 70vh !important; }
+          .rsp-v2-about-footer { order: 3; padding: ${SPACING.xl}px ${SPACING.lg}px ${SPACING.xxxl}px ${SPACING.lg}px !important; }
         }
 
         .v2-about-back-link:hover { color: ${COLOR.textSecondary} !important; }
+        .v2-social-link:hover { color: ${COLOR.textSecondary} !important; }
       `}</style>
     </div>
   )
