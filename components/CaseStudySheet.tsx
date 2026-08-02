@@ -319,7 +319,6 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
               height: 32,
               borderRadius: "50%",
               border: "none",
-              background: "#fff",
               // Same 3-layer shadow formula as the project card cover image.
               boxShadow: "0 0 0 1px rgba(25,28,33,0.04), 0 1px 2px 1px rgba(25,28,33,0.04), 0 0 2px 0 rgba(0,0,0,0.08)",
               backdropFilter: "blur(8px)",
@@ -340,7 +339,8 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
 
       <style>{`
         .cs-drag-handle-row:hover .cs-drag-handle { transform: scaleX(1.15) scaleY(1.5); }
-        .cs-close-btn:hover { background: #F1F2F4; }
+        .cs-close-btn { background: #fff; }
+        .cs-close-btn:hover { background: #F6F6F6; }
 
         @media (max-width: 768px) {
           /* Extra clearance below the drag handle so the case study's own
