@@ -13,7 +13,7 @@ import { playV2Click, playV2Select } from "@/lib/v2-sound"
 const PROJECTS = [
   {
     title: "Rethinking the Overlay as a Control Surface",
-    category: "Product Design",
+    category: "Feature Integration",
     date: "May - Dec 2025",
     description: "Designing a conversational AI assistant embedded in AMD's Adrenalin software for millions of gamers.",
     href: "/amd_ai_project",
@@ -33,7 +33,7 @@ const PROJECTS = [
   },
   {
     title: "Reducing Clutter Without Losing Context",
-    category: "Product Design",
+    category: "Feature Integration",
     date: "April – August 2024",
     description: "Streamlining FME's annotation workflow so users can focus on insight, not interface noise.",
     href: "/fme_annotation_project",
@@ -220,10 +220,8 @@ function TabButton({
             borderRadius: 8,
             background: "linear-gradient(180deg, #FFFFFF 0%, #FBFBFB 100%)",
             border: "1px solid rgba(255,255,255,0.8)",
-            // Lifted, embossed pill: a bright inner top edge (light catching
-            // the raised surface) plus a soft outer drop shadow to lift it
-            // off the darker, recessed track underneath.
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px -1px rgba(0,0,0,0.1)",
+            // Same 3-layer shadow formula as the project card cover image.
+            boxShadow: "0 0 0 1px rgba(25,28,33,0.04), 0 1px 2px 1px rgba(25,28,33,0.04), 0 0 2px 0 rgba(0,0,0,0.08)",
           }}
         />
       )}
@@ -301,8 +299,8 @@ const V2_RESPONSIVE_STYLES = `
   .v2-btn-primary:hover { box-shadow: 0 4px 10px -4px ${withAlpha(COLOR.accentTo, 0.5)}; filter: brightness(1.15); }
   .v2-btn-primary:active { transform: scale(0.97); filter: brightness(0.97); }
 
-  .v2-btn-secondary { transition: transform 0.16s cubic-bezier(0.23,1,0.32,1), background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
-  .v2-btn-secondary:hover { background: ${COLOR.border}; border-color: ${COLOR.borderHover}; color: ${COLOR.textPrimary} !important; }
+  .v2-btn-secondary { transition: transform 0.16s cubic-bezier(0.23,1,0.32,1), filter 0.15s ease; }
+  .v2-btn-secondary:hover { filter: brightness(0.96); }
   .v2-btn-secondary:active { transform: scale(0.97); }
 
   .v2-social-link:hover { color: ${COLOR.textSecondary} !important; }
@@ -459,8 +457,12 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   padding: `${SPACING.xs + 2}px ${SPACING.md}px`,
                   borderRadius: RADIUS.sm,
                   background: `linear-gradient(180deg, ${COLOR.accentFrom} 0%, ${COLOR.accentTo} 100%)`,
-                  boxShadow: "0 -4px 3px rgba(202,202,202,0) inset",
-                  outline: `1px solid ${COLOR.accentOutline}`,
+                  // Same 3-layer shadow formula as the project cards (ring +
+                  // downward drop + soft blur), retinted from neutral
+                  // gray/black to the button's own purple (accentTo) since a
+                  // gray-tinted shadow read muddy against this saturated a
+                  // background.
+                  boxShadow: "0 0 0 1px rgba(69,72,199,0.25), 0 1px 2px 1px rgba(69,72,199,0.2), 0 0 3px 0 rgba(69,72,199,0.35), 0 -4px 3px rgba(202,202,202,0) inset",
                   textDecoration: "none",
                   fontFamily: TYPE.fontFamily,
                   fontSize: TYPE.size.label,
@@ -483,13 +485,16 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   padding: `${SPACING.xs + 2}px ${SPACING.md}px`,
                   borderRadius: RADIUS.sm,
                   background: `linear-gradient(180deg, ${COLOR.buttonSurfaceFrom} 0%, ${COLOR.buttonSurfaceTo} 100%)`,
-                  border: `1px solid ${COLOR.border}`,
+                  // Higher-contrast 3-layer shadow, same formula as the
+                  // close button — its own 1px ring layer replaces the old
+                  // solid border.
+                  boxShadow: "0 2px 2px -1px rgba(0,0,0,0.06), 0 4px 4px -2px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.1)",
                   textDecoration: "none",
                   fontFamily: TYPE.fontFamily,
                   fontSize: TYPE.size.label,
                   fontWeight: 500,
                   letterSpacing: "-0.03em",
-                  color: COLOR.textSecondary,
+                  color: COLOR.textPrimary,
                 }}
               >
                 More about me
@@ -577,11 +582,11 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   height: 36,
                   padding: 3,
                   borderRadius: 10,
-                  background: "linear-gradient(180deg, #E9E9E9 0%, #DCDCDC 100%)",
+                  background: "linear-gradient(180deg, #F1F1F1 0%, #E4E4E4 100%)",
                   // Softly recessed groove — a light top inset (as if the
                   // surface curves down away from the light) and a dark
                   // bottom inset for depth, like the track is pressed in.
-                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1), inset 0 -1px 1px rgba(255,255,255,0.6)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06), inset 0 -1px 1px rgba(255,255,255,0.4)",
                 }}
               >
                 <TabButton
@@ -604,9 +609,8 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   gap={SPACING.lg}
                   rowGap={24}
                   cardGap={SPACING.sm}
-                  titleColor={COLOR.textSecondary}
-                  titleColorHover={COLOR.textPrimary}
-                  dateColor={COLOR.textTertiary}
+                  titleColor="#575757"
+                  titleColorHover="#575757"
                   onCardOpen={openCaseStudy}
                   onClickSound={playV2Select}
                 />
@@ -618,10 +622,10 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
                   gap={SPACING.lg}
                   rowGap={24}
                   cardGap={SPACING.sm}
-                  titleColor={COLOR.textSecondary}
-                  titleColorHover={COLOR.textPrimary}
-                  dateColor={COLOR.textTertiary}
+                  titleColor="#575757"
+                  titleColorHover="#575757"
                   onClickSound={playV2Select}
+                  showCategoryBadge={false}
                 />
               </div>
             )}

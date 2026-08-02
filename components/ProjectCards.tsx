@@ -29,6 +29,37 @@ export interface Project {
   sheet?: boolean
 }
 
+// Category → badge color mapping. Each entry follows the same formula: a
+// faint tint for the background, the accent itself for the 1px border, and
+// a slightly deeper shade of the same hue for the text (so it stays legible
+// at 12px, where the pure accent alone would be too light against the tint).
+const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+  "Feature Integration": { bg: "#F7FFF7", border: "#50C100", text: "#009951" },
+  "Design System": { bg: "#F7FCFF", border: "#00B7F3", text: "#2683D8" },
+  "Photography": { bg: "#FFF9F2", border: "#E8792E", text: "#C15F1A" },
+  "Vibe Coded": { bg: "#F7FFF7", border: "#50C100", text: "#009951" },
+}
+const DEFAULT_CATEGORY_COLOR = { bg: "#F7F7F7", border: "#999999", text: "#666666" }
+
+function CategoryBadge({ category }: { category: string }) {
+  const { bg, border, text } = CATEGORY_COLORS[category] ?? DEFAULT_CATEGORY_COLOR
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      borderRadius: 4, padding: "4px 8px",
+      backgroundColor: bg, border: `1px solid ${border}`,
+      flexShrink: 0,
+    }}>
+      <span style={{
+        fontFamily: "var(--font-sans)", fontSize: "0.6875rem", fontWeight: 500,
+        letterSpacing: "-0.01em", lineHeight: "150%", color: text, whiteSpace: "nowrap",
+      }}>
+        {category}
+      </span>
+    </div>
+  )
+}
+
 const coverStyle = (hovered: boolean, fit: "cover" | "contain" = "cover"): React.CSSProperties => ({
   width: "100%", height: "100%", objectFit: fit, display: "block",
   // Baseline is a hair over 1 (not exactly 1) so the video's rasterized
@@ -99,9 +130,9 @@ function ProjectCard({
   cardGap = 10,
   titleColor,
   titleColorHover,
-  dateColor,
   onClickSound = playClick,
   revealDelay,
+  showCategoryBadge = true,
 }: {
   project: Project
   onLightbox?: () => void
@@ -109,13 +140,16 @@ function ProjectCard({
   cardGap?: number
   titleColor?: string
   titleColorHover?: string
-  dateColor?: string
   onClickSound?: () => void
   // When set, the cover reveals via a bottom-to-top clip-path wipe on first
   // mount, delayed by this many ms — used to stagger cards in the same row.
   // Undefined (the default) skips the reveal entirely: existing callers see
   // no behavior change.
   revealDelay?: number
+  // Playground cards don't carry a meaningful category, so the badge is
+  // skipped there — on by default so existing callers (Selected Work) are
+  // unaffected.
+  showCategoryBadge?: boolean
 }) {
   const badgeSize = project.badgeSize ?? 20
   const [hovered, setHovered] = useState(false)
@@ -136,57 +170,82 @@ function ProjectCard({
   }, [])
 
   const inner = (
-    <>
+    <div style={{
+      width: "100%", display: "flex", flexDirection: "column", gap: 8,
+      padding: "2px 2px 12px", borderRadius: 12,
+      backgroundColor: hovered ? "#ECECEC" : "#F1F1F1", border: "1px solid var(--border, #E5E5E5)",
+      boxSizing: "border-box", transition: "background-color 0.2s ease",
+    }}>
       <div style={{
-        width: "100%", aspectRatio: "4/3", borderRadius: 8, overflow: "hidden", backgroundColor: bg,
-        position: "relative", border: coverBorder, padding: coverPadding, boxSizing: "border-box",
-        transform: "translateZ(0)", isolation: "isolate",
-        clipPath: revealed ? "inset(0 0 0 0)" : "inset(0 0 100% 0)",
-        transition: revealDelay === undefined ? undefined : "clip-path 0.6s cubic-bezier(0.16,1,0.3,1)",
+        width: "100%", padding: 4, borderRadius: 12, boxSizing: "border-box",
       }}>
-        {project.carousel ? (
-          <CarouselCover videos={project.carousel} hovered={hovered} />
-        ) : project.coverNode ? project.coverNode : isVideo ? (
-          <video ref={coverVideoRef} src={project.cover} loop muted playsInline preload="metadata" style={coverStyle(hovered, fit)} />
-        ) : (
-          <Image
-            src={project.cover}
-            alt={project.title}
-            fill
-            quality={90}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            draggable={false}
-            style={{ ...coverStyle(hovered, fit), objectFit: fit }}
-          />
-        )}
-        {project.badge && (
-          <div className="project-badge" style={{
-            position:   "absolute",
-            bottom:     12,
-            right:      12,
-            opacity:    hovered ? 1 : 0,
-            transform:  hovered ? "translateY(0)" : "translateY(4px)",
-            transition: "opacity 0.25s ease, transform 0.25s ease",
-            pointerEvents: "none",
+        <div style={{
+          width: "100%", aspectRatio: "4/3", borderRadius: 10,
+          position: "relative", boxSizing: "border-box",
+          transform: "translateZ(0)", isolation: "isolate",
+          // Shadow lives on this outer, non-clipping box — the inner box
+          // below needs overflow:hidden to clip the video/image to the
+          // rounded corner, but overflow:hidden on the same element also
+          // clips that element's own box-shadow, cutting the ring off right
+          // at the corners where it should be most visible. Splitting the
+          // shadow onto a wrapper with no overflow fixes that.
+          boxShadow: "0 0 0 1px rgba(25,28,33,0.04), 0 1px 2px 1px rgba(25,28,33,0.04), 0 0 2px 0 rgba(0,0,0,0.08)",
+        }}>
+          <div style={{
+            width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", backgroundColor: bg,
+            position: "relative", border: coverBorder, padding: coverPadding, boxSizing: "border-box",
+            clipPath: revealed ? "inset(0 0 0 0)" : "inset(0 0 100% 0)",
+            transition: revealDelay === undefined ? undefined : "clip-path 0.6s cubic-bezier(0.16,1,0.3,1)",
           }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={project.badge} alt="" className="project-badge-img" style={{ height: badgeSize, width: "auto", display: "block" }} />
+            {project.carousel ? (
+              <CarouselCover videos={project.carousel} hovered={hovered} />
+            ) : project.coverNode ? project.coverNode : isVideo ? (
+              <video ref={coverVideoRef} src={project.cover} loop muted playsInline preload="metadata" style={coverStyle(hovered, fit)} />
+            ) : (
+              <Image
+                src={project.cover}
+                alt={project.title}
+                fill
+                quality={90}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                draggable={false}
+                style={{ ...coverStyle(hovered, fit), objectFit: fit }}
+              />
+            )}
+            {project.badge && (
+              <div className="project-badge" style={{
+                position:   "absolute",
+                bottom:     12,
+                right:      12,
+                opacity:    hovered ? 1 : 0,
+                transform:  hovered ? "translateY(0)" : "translateY(4px)",
+                transition: "opacity 0.25s ease, transform 0.25s ease",
+                pointerEvents: "none",
+              }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={project.badge} alt="" className="project-badge-img" style={{ height: badgeSize, width: "auto", display: "block" }} />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "0 12px", minHeight: 25 }}>
         <p style={{
           fontFamily: "var(--font-sans)", fontSize: "0.8125rem", fontWeight: 500,
           color: hovered ? (titleColorHover ?? "var(--c-mid)") : (titleColor ?? "var(--c-faint)"),
           letterSpacing: "-0.01em", margin: 0, transition: "color 0.2s ease",
+          // Clamped to one line so title length can't vary a card's total
+          // height against its row-mates — titles that would otherwise wrap
+          // (e.g. Playground's longer ones) truncate instead.
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0,
         }}>
           {project.title}
         </p>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.75rem", fontWeight: 400, color: dateColor ?? "var(--c-faint)", letterSpacing: "-0.01em", flexShrink: 0 }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", fontWeight: 400, color: "#919191", letterSpacing: "-0.01em", flexShrink: 0 }}>
           {project.date}
         </span>
       </div>
-    </>
+    </div>
   )
 
   if (project.comingSoon) {
@@ -266,9 +325,9 @@ const ProjectCards = memo(function ProjectCards({
   cardGap,
   titleColor,
   titleColorHover,
-  dateColor,
   onClickSound,
   revealOnMount = false,
+  showCategoryBadge = true,
 }: {
   projects: Project[]
   onLightbox?: () => void
@@ -278,11 +337,14 @@ const ProjectCards = memo(function ProjectCards({
   cardGap?: number
   titleColor?: string
   titleColorHover?: string
-  dateColor?: string
   onClickSound?: () => void
   // Covers wipe in on first mount, staggered 60ms per column across the
   // fixed 2-column grid — off by default so existing callers are unaffected.
   revealOnMount?: boolean
+  // Playground cards don't carry a meaningful category, so the badge is
+  // skipped there — on by default so existing callers (Selected Work) are
+  // unaffected.
+  showCategoryBadge?: boolean
 }) {
   return (
     <div className="rsp-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: gap, rowGap: rowGap ?? gap }}>
@@ -295,8 +357,8 @@ const ProjectCards = memo(function ProjectCards({
           cardGap={cardGap}
           titleColor={titleColor}
           titleColorHover={titleColorHover}
-          dateColor={dateColor}
           revealDelay={revealOnMount ? (i % 2) * 60 : undefined}
+          showCategoryBadge={showCategoryBadge}
           {...(onClickSound ? { onClickSound } : {})}
         />
       ))}
