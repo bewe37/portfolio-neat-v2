@@ -147,7 +147,9 @@ html {
 }
 
 body.gallery-open [data-shared-nav],
-body.gallery-open [data-mobile-menu] {
+body.gallery-open [data-mobile-menu],
+body.cs-sheet-open [data-shared-nav],
+body.cs-sheet-open [data-mobile-menu] {
   display: none !important;
 }
 

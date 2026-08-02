@@ -99,7 +99,18 @@ export default function CaseStudySheet({ content, onClose, onRequestClose }: Cas
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    return () => { document.body.style.overflow = prev }
+    // MobileMenu/SharedNav hide themselves on this class — they otherwise
+    // key visibility off usePathname(), which does update to the case
+    // study's own route even though openCaseStudy only ever does a plain
+    // pushState (see V2Layout). That's normally masked by the backdrop's
+    // opacity, but the homepage's own recede-behind-the-sheet animation
+    // exposes a thin sliver of true page edge where a fixed-position
+    // hamburger button would otherwise show through.
+    document.body.classList.add("cs-sheet-open")
+    return () => {
+      document.body.style.overflow = prev
+      document.body.classList.remove("cs-sheet-open")
+    }
   }, [])
 
   // Pause every video outside the sheet while it's open. They're fully

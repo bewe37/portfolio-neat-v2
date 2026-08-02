@@ -40,8 +40,13 @@ function Sparkle({ spinning }: { spinning: boolean }) {
 const CASE_STUDY_PATHS = ["/gallery"]
 // The homepage (the case-study sheet experience) and /about both render
 // their own nav — this shared one is only for pages that don't
-// (companions, admin, onboarding, explore).
-const HIDDEN_NAV_PATHS = ["/explore", "/about"]
+// (companions, admin, onboarding, explore). The four /*_project + /blueprint
+// paths are also the homepage: opening a case study sheet updates the URL
+// via pushState (see V2Layout's openCaseStudy) without a real navigation,
+// which usePathname() does still pick up — so without listing them here
+// too, this nav would start rendering behind the open sheet the moment the
+// URL changes, becoming visible through the recede animation's gap.
+const HIDDEN_NAV_PATHS = ["/explore", "/about", "/amd_ai_project", "/amd_project", "/fme_annotation_project", "/blueprint"]
 
 export default function SharedNav() {
   const pathname = usePathname()

@@ -8,8 +8,10 @@ import Link from "next/link"
 import { playClick } from "@/lib/click-sound"
 
 // The homepage and /about handle their own responsive layout instead of
-// this hamburger menu — same set SharedNav hides for.
-const HIDDEN_NAV_PATHS = ["/explore", "/about"]
+// this hamburger menu — same set SharedNav hides for, including the case
+// study routes (see SharedNav's HIDDEN_NAV_PATHS comment for why those
+// need to be listed explicitly rather than relying on pathname === "/").
+const HIDDEN_NAV_PATHS = ["/explore", "/about", "/amd_ai_project", "/amd_project", "/fme_annotation_project", "/blueprint"]
 
 const MotionLink = motion(Link)
 
