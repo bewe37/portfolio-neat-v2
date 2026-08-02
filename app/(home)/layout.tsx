@@ -1,14 +1,21 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 import { AnimatePresence, motion } from "framer-motion"
 import ProjectCards, { type Project } from "@/components/ProjectCards"
-import CaseStudySheet from "@/components/CaseStudySheet"
 import CharacterAvatar from "@/components/CharacterAvatar"
 import { SocialLinkGroup } from "@/components/SocialLinkGroup"
-import { CASE_STUDIES, CaseStudyNavContext } from "@/lib/case-studies"
+import { CaseStudyNavContext, type CaseStudyContent } from "@/lib/case-studies"
 import { COLOR, SPACING, RADIUS, TYPE, withAlpha } from "@/lib/v2-tokens"
 import { playV2Click, playV2Select } from "@/lib/v2-sound"
+
+// Both the sheet shell and the ~1,300-line case-study content module (all
+// four case studies' full JSX bodies) are dynamic-imported: neither is
+// needed until a project card is actually opened, so they shouldn't ship
+// in the homepage's initial bundle. ssr: false because the sheet is a
+// client-only portal with no meaningful server-rendered state.
+const CaseStudySheet = dynamic(() => import("@/components/CaseStudySheet"), { ssr: false })
 
 const PROJECTS = [
   {
@@ -339,7 +346,19 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
   const [openProject, setOpenProject] = useState<Project | null>(() =>
     typeof window === "undefined" ? null : projectFromPathname(window.location.pathname)
   )
-  const activeCaseStudy = openProject ? CASE_STUDIES[openProject.href] : undefined
+
+  // The CASE_STUDIES content map lives in the same dynamically-imported
+  // module as the case-study JSX bodies (see CaseStudySheet import above)
+  // — loaded on demand instead of statically, so its ~1,300 lines never
+  // ship in the homepage's initial bundle. Populated as soon as a project
+  // is open (including on first mount, for a direct case-study URL).
+  const [caseStudies, setCaseStudies] = useState<Record<string, CaseStudyContent> | null>(null)
+  useEffect(() => {
+    if (!openProject || caseStudies) return
+    import("@/lib/case-studies").then(({ CASE_STUDIES }) => setCaseStudies(CASE_STUDIES))
+  }, [openProject, caseStudies])
+
+  const activeCaseStudy = openProject ? caseStudies?.[openProject.href] : undefined
 
   // Drives the homepage's own recede-behind-the-sheet animation.
   // Deliberately separate from openProject: that only goes back to null
