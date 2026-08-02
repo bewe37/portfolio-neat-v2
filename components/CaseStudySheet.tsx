@@ -10,6 +10,12 @@ import type { CaseStudyContent } from "@/lib/case-studies"
 interface CaseStudySheetProps {
   content: CaseStudyContent
   onClose: () => void
+  // Fires the instant a close is requested (button/backdrop/Escape/drag),
+  // not when the sheet has actually finished fading out like onClose does
+  // — lets the homepage's own recede-behind-the-sheet animation start
+  // undoing immediately instead of waiting for the sheet to fully
+  // disappear first, which read as sluggish.
+  onRequestClose?: () => void
 }
 
 // Partial-height bottom sheet: dark backdrop above the page, rounded top
@@ -28,7 +34,7 @@ interface CaseStudySheetProps {
 // interactive gesture with release velocity that CSS can't express — and
 // it's only enabled once the open transition has already finished, so the
 // two never fight over the same transform at the same time.
-export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps) {
+export default function CaseStudySheet({ content, onClose, onRequestClose }: CaseStudySheetProps) {
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
   // True once the opening slide has finished. Gates the two things that
@@ -113,6 +119,7 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
   function requestClose() {
     setSettled(false)
     setOpen(false)
+    onRequestClose?.()
   }
 
   // Only the opacity transition is used as the open/close signal — the
@@ -171,7 +178,7 @@ export default function CaseStudySheet({ content, onClose }: CaseStudySheetProps
         // instead of a blur that visibly kicks in after the fact. `settled`
         // still gates drag separately (see below): that one has to wait for
         // the real transitionend, not just "mostly done".
-        backdropFilter: open ? "blur(4px)" : "none",
+        backdropFilter: open ? "blur(1px)" : "none",
         transition: reducedMotion
           ? "opacity 0.01s linear"
           : open

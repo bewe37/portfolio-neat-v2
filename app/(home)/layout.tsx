@@ -341,6 +341,20 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
   )
   const activeCaseStudy = openProject ? CASE_STUDIES[openProject.href] : undefined
 
+  // Drives the homepage's own recede-behind-the-sheet animation.
+  // Deliberately separate from openProject: that only goes back to null
+  // once the sheet has fully faded out (see closeCaseStudy/onClose), so
+  // gating the recede transform on it directly meant the page sat scaled
+  // down for the sheet's whole closing fade before finally animating back
+  // — sluggish. This flips false the instant a close is *requested*
+  // (onRequestClose, fired synchronously from the sheet's own close
+  // handlers) and true whenever a project opens, so the two motions start
+  // together in both directions.
+  const [sheetRecede, setSheetRecede] = useState(false)
+  useEffect(() => {
+    if (openProject) setSheetRecede(true)
+  }, [openProject])
+
   // Back/forward buttons are the only thing that can change the URL out
   // from under us now, so popstate is the only sync we need. It fires
   // without a navigation, so this is just a state update.
@@ -390,6 +404,20 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
         background: COLOR.bg,
         display: "flex",
         overflow: "hidden",
+        // Recedes behind the case study sheet while it's open — same
+        // "card stack" effect as iOS's presented-sheet transition. Driven
+        // by sheetRecede (see above), not openProject directly, so closing
+        // animates back immediately rather than waiting for the sheet's
+        // own fade-out to finish first.
+        // transformOrigin center-top (not the scale default of center) so
+        // the top edge recedes straight down from the viewport top instead
+        // of scaling in from the middle — the translateY then pulls it
+        // down a further 10px so a sliver of backdrop shows above it too,
+        // not just at the sides/bottom.
+        transform: sheetRecede ? "scale(0.94) translateY(10px)" : "scale(1) translateY(0)",
+        transformOrigin: "center top",
+        borderRadius: sheetRecede ? 20 : 0,
+        transition: "transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.38s cubic-bezier(0.32, 0.72, 0, 1)",
       }}
     >
       <div
@@ -637,7 +665,7 @@ export default function V2Layout({ children }: { children?: React.ReactNode }) {
 
       {activeCaseStudy && (
         <CaseStudyNavContext.Provider value={openCaseStudyByHref}>
-          <CaseStudySheet content={activeCaseStudy} onClose={closeCaseStudy} />
+          <CaseStudySheet content={activeCaseStudy} onClose={closeCaseStudy} onRequestClose={() => setSheetRecede(false)} />
         </CaseStudyNavContext.Provider>
       )}
 
