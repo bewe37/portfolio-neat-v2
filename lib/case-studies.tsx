@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { COLOR, TYPE } from "@/lib/v2-tokens"
+import { COLOR, RADIUS, TYPE, withAlpha } from "@/lib/v2-tokens"
 import { playV2Click } from "@/lib/v2-sound"
 import { useLazyVideo } from "@/lib/use-lazy-video"
 
@@ -48,7 +48,10 @@ function MediaBorderFrame({ children, style, onMouseEnter, onMouseLeave }: {
   const bordered = useContext(MediaBorderContext)
   if (!bordered) return <div style={{ ...mediaFrame, ...style }} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{children}</div>
   return (
-    <div style={{ borderRadius: mediaFrame.borderRadius, boxShadow: "0 0 0 1px rgba(25,28,33,0.04), 0 1px 2px 1px rgba(25,28,33,0.04), 0 0 2px 0 rgba(0,0,0,0.08)" }}>
+    <div style={{
+      borderRadius: mediaFrame.borderRadius,
+      boxShadow: "0 0 0 1px rgba(25,28,33,0.04), 0 1px 2px 1px rgba(25,28,33,0.04), 0 0 2px 0 rgba(0,0,0,0.08)",
+    }}>
       <div style={{ ...mediaFrame, ...style }} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{children}</div>
     </div>
   )
@@ -173,7 +176,7 @@ function MediaGrid({ items }: { items: string[] }) {
 
 function LabeledMediaGrid({ items, labels, stack }: { items: string[]; labels?: string[]; stack?: boolean }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: stack ? "1fr" : `repeat(${items.length}, 1fr)`, gap: 16 }}>
+    <div className="cs-labeled-media-grid" style={{ display: "grid", gridTemplateColumns: stack ? "1fr" : `repeat(${items.length}, 1fr)`, gap: 16 }}>
       {items.map((src, i) => (
         <div key={src} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <Media src={src} alt={labels?.[i]} />
@@ -214,8 +217,21 @@ function SectionBody({ children, marginBottom = 0 }: { children: React.ReactNode
 
 function HmwCallout({ text }: { text: string }) {
   return (
-    <div style={{ borderLeft: `2px solid ${COLOR.accentOutline}`, paddingLeft: 20, margin: "28px 0" }}>
-      <p style={{ fontFamily: TYPE.fontFamily, fontSize: 18, fontWeight: 400, fontStyle: "italic", color: COLOR.textPrimary, letterSpacing: "-0.01em", lineHeight: 1.55, margin: 0 }}>
+    <div
+      style={{
+        margin: "28px 0",
+        minHeight: 168,
+        padding: "28px 48px",
+        borderRadius: 12,
+        background: "#FAFAFA",
+        backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px)",
+        backgroundSize: "18px 18px",
+        display: "flex",
+        alignItems: "center",
+        boxShadow: `${withAlpha(COLOR.textPrimary, 0.04)} 0px 0px 0px 1px, ${withAlpha(COLOR.textPrimary, 0.06)} 0px 1px 2px 1px, ${withAlpha(COLOR.textPrimary, 0.08)} 0px 0px 2px`,
+      }}
+    >
+      <p style={{ fontFamily: TYPE.fontFamily, fontSize: 18, fontWeight: 500, color: COLOR.textSecondary, letterSpacing: "-0.02em", lineHeight: 1.5, margin: 0 }}>
         {text}
       </p>
     </div>
@@ -374,7 +390,7 @@ function HighlightCard({ icon, title, body, image }: { icon?: string; title: str
 
 function HighlightRow({ items, marginTop }: { items: { icon?: string; title: string; body?: string; image?: string }[]; marginTop: number }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: `repeat(${items.length}, 1fr)`, gap: 16, alignItems: "stretch", gridAutoRows: "1fr", marginTop }}>
+    <div className="cs-highlight-row" style={{ display: "grid", gridTemplateColumns: `repeat(${items.length}, 1fr)`, gap: 16, alignItems: "stretch", gridAutoRows: "1fr", marginTop }}>
       {items.map((item) => <HighlightCard key={item.title} {...item} />)}
     </div>
   )
@@ -822,6 +838,11 @@ const PAGE_RESPONSIVE_STYLES = `
     .cs-page { padding: 24px 20px 64px !important; }
     .cs-page-toc { grid-template-columns: 1fr !important; gap: 0 !important; }
     .cs-toc-rail { display: none !important; }
+    /* Multi-column media/highlight rows (e.g. Contextual Chat's paired
+       screenshots, In-Session Mode's side-by-side pair, Design
+       Direction's three pillar cards, Outcome's two pillars) stack to a
+       single column instead of squeezing every item into a slim strip. */
+    .cs-labeled-media-grid, .cs-highlight-row { grid-template-columns: 1fr !important; }
   }
 `
 
