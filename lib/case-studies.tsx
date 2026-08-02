@@ -18,6 +18,13 @@ export interface CaseStudyContent {
 // that provider, which doesn't happen in practice.
 export const CaseStudyNavContext = createContext<(href: string) => void>(() => {})
 
+// Opt-in per case study: when true, every Img/Video rendered inside wraps
+// itself in the same 3-layer shadow "border" used on the project cards.
+// Scoped via context (default false) rather than a prop threaded through
+// Section/MediaGrid/HighlightCard/Accordion/ChapterVideo's many layers, so
+// one case study can opt in without touching every other one's call sites.
+const MediaBorderContext = createContext(false)
+
 // Clean, quiet rendition: no boxed media chrome, no medium/semibold text
 // weights, small restrained type scale throughout — everything sits at
 // regular (400) weight, letting whitespace and hierarchy of size do the work.
@@ -27,12 +34,32 @@ const mediaFrame: React.CSSProperties = {
   overflow: "hidden",
 }
 
+// Same 3-layer shadow "border" as the project card cover image, wrapping
+// mediaFrame content when MediaBorderContext is on. The shadow lives on an
+// outer, non-clipping box — mediaFrame's own overflow:hidden (needed to
+// clip the image/video to its rounded corner) would otherwise also clip
+// this element's own box-shadow right at the edge where it's most visible.
+function MediaBorderFrame({ children, style, onMouseEnter, onMouseLeave }: {
+  children: React.ReactNode
+  style?: React.CSSProperties
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
+}) {
+  const bordered = useContext(MediaBorderContext)
+  if (!bordered) return <div style={{ ...mediaFrame, ...style }} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{children}</div>
+  return (
+    <div style={{ borderRadius: mediaFrame.borderRadius, boxShadow: "0 0 0 1px rgba(25,28,33,0.04), 0 1px 2px 1px rgba(25,28,33,0.04), 0 0 2px 0 rgba(0,0,0,0.08)" }}>
+      <div style={{ ...mediaFrame, ...style }} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>{children}</div>
+    </div>
+  )
+}
+
 function Img({ src, alt = "" }: { src: string; alt?: string }) {
   return (
-    <div style={mediaFrame}>
+    <MediaBorderFrame>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={encodeURI(src)} alt={alt} style={{ width: "100%", display: "block" }} />
-    </div>
+    </MediaBorderFrame>
   )
 }
 
@@ -74,7 +101,7 @@ function Video({ src, zoom, alt = "", priority = false }: { src: string; zoom?: 
   }
 
   return (
-    <div
+    <MediaBorderFrame
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       // Matches the sheet's own background. A <video> with no decoded
@@ -83,7 +110,7 @@ function Video({ src, zoom, alt = "", priority = false }: { src: string; zoom?: 
       // between mount and first decoded frame, which without this shows as
       // a black flash against the sheet. Cached reopens skip the gap
       // entirely, which is why it was only ever visible the first time.
-      style={{ ...mediaFrame, lineHeight: 0, position: "relative", backgroundColor: COLOR.bg }}
+      style={{ lineHeight: 0, position: "relative", backgroundColor: COLOR.bg }}
     >
       <video
         ref={videoRef}
@@ -128,7 +155,7 @@ function Video({ src, zoom, alt = "", priority = false }: { src: string; zoom?: 
           </svg>
         </button>
       </div>
-    </div>
+    </MediaBorderFrame>
   )
 }
 
@@ -435,7 +462,7 @@ function ChapterVideo({ src, chapters }: { src: string; chapters: { time: number
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ ...mediaFrame, position: "relative" }}>
+      <MediaBorderFrame style={{ position: "relative" }}>
         <video
           ref={videoRef}
           src={encodeURI(src)}
@@ -474,7 +501,7 @@ function ChapterVideo({ src, chapters }: { src: string; chapters: { time: number
             </svg>
           </div>
         </div>
-      </div>
+      </MediaBorderFrame>
 
       {/* Equal-width chapter segments, stories-style per-segment fill —
           desktop only, same as the live case study pages: five draggable
@@ -850,6 +877,7 @@ const AMD_AI_TOC: TocItem[] = [
 
 function AmdAiOverlayBody() {
   return (
+    <MediaBorderContext.Provider value={true}>
     <Page tocItems={AMD_AI_TOC}>
       <Header
         title="Rethinking the Overlay as a Control Surface"
@@ -994,6 +1022,7 @@ function AmdAiOverlayBody() {
         mediaWrapper={media => <NavigableCard href="/amd_project">{media}</NavigableCard>}
       />
     </Page>
+    </MediaBorderContext.Provider>
   )
 }
 
@@ -1011,6 +1040,7 @@ const AMD_DS_TOC: TocItem[] = [
 
 function AmdDesignSystemBody() {
   return (
+    <MediaBorderContext.Provider value={true}>
     <Page tocItems={AMD_DS_TOC}>
       <Header
         title="The Design System That Kept AMD's Team Aligned"
@@ -1090,6 +1120,7 @@ function AmdDesignSystemBody() {
         mediaWrapper={media => <NavigableCard href="/amd_ai_project">{media}</NavigableCard>}
       />
     </Page>
+    </MediaBorderContext.Provider>
   )
 }
 
@@ -1107,6 +1138,7 @@ const FME_TOC: TocItem[] = [
 
 function FmeAnnotationBody() {
   return (
+    <MediaBorderContext.Provider value={true}>
     <Page tocItems={FME_TOC}>
       <Header
         title="Reducing Clutter Without Losing Context"
@@ -1217,6 +1249,7 @@ Participants completed 96% of the required tasks and indicated that the feature 
         footnote="User reactions on LinkedIn following the release."
       />
     </Page>
+    </MediaBorderContext.Provider>
   )
 }
 
@@ -1225,6 +1258,7 @@ Participants completed 96% of the required tasks and indicated that the feature 
 // ─────────────────────────────────────────────────────────────────────────
 function BlueprintBody() {
   return (
+    <MediaBorderContext.Provider value={true}>
     <Page>
       <Header
         title="Simplifying Donation Tracking at Scale"
@@ -1246,6 +1280,7 @@ ReGiftCard is the dashboard built to fix that. It gives the Fix the 6ix team a s
         media={["/HomePageHighlight.png", "/HighlightV2.png", "/VibeAnimationTest.mp4"]}
       />
     </Page>
+    </MediaBorderContext.Provider>
   )
 }
 
