@@ -702,7 +702,7 @@ function Header({ title, cover, specs, intro }: { title: string; cover: string; 
         {title}
       </h1>
       {intro && <SectionBody marginBottom={20}>{intro}</SectionBody>}
-      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "16px 40px" }}>
+      <div style={{ display: "flex", justifyContent: "flex-start", flexWrap: "wrap", gap: "16px 56px" }}>
         {specs.map((s) => (
           <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={{ fontFamily: TYPE.fontFamily, fontSize: 13, fontWeight: 400, color: COLOR.textTertiary, letterSpacing: "-0.02em" }}>
