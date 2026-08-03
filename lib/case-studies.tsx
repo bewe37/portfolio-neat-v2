@@ -220,18 +220,18 @@ function HmwCallout({ text }: { text: string }) {
     <div
       style={{
         margin: "28px 0",
-        minHeight: 168,
-        padding: "28px 48px",
+        padding: "32px 48px",
         borderRadius: 12,
         background: "#FAFAFA",
         backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px)",
         backgroundSize: "18px 18px",
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
         boxShadow: `${withAlpha(COLOR.textPrimary, 0.04)} 0px 0px 0px 1px, ${withAlpha(COLOR.textPrimary, 0.06)} 0px 1px 2px 1px, ${withAlpha(COLOR.textPrimary, 0.08)} 0px 0px 2px`,
       }}
     >
-      <p style={{ fontFamily: TYPE.fontFamily, fontSize: 18, fontWeight: 500, color: COLOR.textSecondary, letterSpacing: "-0.02em", lineHeight: 1.5, margin: 0 }}>
+      <p style={{ fontFamily: TYPE.fontFamily, fontSize: 18, fontWeight: 500, color: COLOR.textSecondary, letterSpacing: "-0.02em", lineHeight: 1.5, margin: 0, textAlign: "center", textWrap: "balance" }}>
         {text}
       </p>
     </div>
