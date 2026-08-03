@@ -161,7 +161,7 @@ export function SocialLinkGroup({ items }: { items: SocialLinkItem[] }) {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                transition={{ duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
                 style={{ display: "block" }}
               >
                 {active.tooltip}

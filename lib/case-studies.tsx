@@ -940,38 +940,43 @@ function AmdAiOverlayBody() {
       />
 
       <Section
+        id="toc-research"
         label="Usability Sessions"
         dividerBefore
         dividerText="Research"
         title="Settings only experts could parse"
-        body="The overlay alone didn't tell the full story. To understand the depth of the problems the team was dealing with, I ran moderated usability sessions with 6 users, not just to evaluate the overlay, but to map out where the entire software experience was breaking down. As more features moved into the full application, settings became more numerous and granular. Users consistently struggled to know what each option did or how it would affect their system without prior technical knowledge."
+        body="When users left the overlay to change a setting, the full application is where they ended up, so I ran moderated usability sessions with 6 users to see what that was actually like. What I found went deeper than the overlay: the full application had grown packed with settings, most of them labeled in technical terms only an expert would recognize."
         media={["/TechnicalTerms.png"]}
       />
 
-      <Section
-        id="toc-research"
-        label="Research"
-        title="What this pointed to"
-        body="Across almost every session, the same thing kept surfacing: even when users found the right setting, they didn't have the knowledge to act on it. That became the focus."
-        hmw="How might we help users understand a setting well enough to act on it, without needing prior technical knowledge?"
-      />
+      {/* Continues the Usability Sessions section above rather than starting
+          a new one — the finding needs to land after the settings-list
+          screenshot, not before it, so it's laid out directly instead of
+          through Section (whose fixed body → hmw → media order can't do
+          that and would also print a second "Usability Sessions" label). */}
+      <div style={{ marginTop: -20, paddingBottom: 44 }}>
+        <SectionBody marginBottom={24}>
+          {"Across almost every session, users weren't sure which features actually fit their system or their needs, so most went unused. Not because the features didn't matter, but because users couldn't tell what they'd do for them.\n\nSo the overlay couldn't act on a setting, and the full application could, but didn't explain it. Either way, users were left to figure it out alone."}
+        </SectionBody>
+        <HmwCallout text="How might we help users understand a setting well enough to act on it, without needing prior technical knowledge?" />
+      </div>
 
       <Section
         id="toc-design-direction"
         label="Design Direction"
         title="Direct control first, AI second"
-        body="This overlay opens mid-activity, when attention is already split. There's no room to parse an unfamiliar setting, so the interaction has to ask almost nothing: see the control, understand it, tap it, get back to what you were doing. Direct, one-tap controls became the foundation, with AI in reserve for when someone doesn't know what to change. From there, I proposed three components to the team."
+        body="The overlay opens mid-activity, while a user is still focused on their game. They don't have time to figure out an unfamiliar setting, so I made direct, one-tap controls the foundation: see it, tap it, get back to what you were doing. AI stays in reserve for when someone doesn't know what to change. From there, I proposed three components to the team."
         highlights={[
-          { title: "Contextual Chat", image: "/CardChat.png" },
-          { title: "Pinned Widgets", image: "/CardPin.png" },
-          { title: "Manual Discovery", image: "/CardManual.png" },
+          { title: "Contextual Chat", body: "Ask anything about your system.", image: "/CardChat.png" },
+          { title: "Pinned Widgets", body: "Save what you find for next time.", image: "/CardPin.png" },
+          { title: "Manual Discovery", body: "Browse when you already know.", image: "/CardManual.png" },
         ]}
       />
 
       <Section
         label="Contextual Chat"
-        title="Not just text. A response built around what you need"
-        body="I built the chat around one principle: don't make users think. Describe what's wrong, and the AI reads live hardware data to find the cause, then surfaces the relevant metrics in the chat or gives you a one-tap action to fix it on the spot. No navigation, no settings hunting."
+        title="Ask when you don't know what to do"
+        body="I built the chat around one principle: don't make users think. Whether something's wrong or they just want to get more out of their system, the AI reads live hardware data to find an answer, then surfaces the relevant metrics in the chat or gives you a one-tap action to fix or try it on the spot. No navigation, no settings hunting. Two of the most common responses users get back:"
         media={["/Metrics.png", "/Features.png"]}
         mediaLabels={["Hardware metrics response", "Feature suggestion with action"]}
       />
@@ -986,7 +991,7 @@ function AmdAiOverlayBody() {
       <Section
         label="Manual Discovery"
         title="Understand a setting by browsing it, not asking about it"
-        body="Not everyone wants to describe their problem to get an answer. I designed a browse path where every widget in the library is labeled and organized by category, so users can read what a setting does, compare it against others, and add it straight to their panel, without needing the AI to explain it first."
+        body="Chat is for users who don't know what they're looking for. Power users already do, and typing it out is slower than just finding it. I designed a browse path where every widget is labeled and organized by category, so users can compare settings and add one straight to their panel without asking the AI first."
         media={["/ManuallyPin.mp4"]}
       />
 
@@ -1027,7 +1032,7 @@ function AmdAiOverlayBody() {
       <Section
         id="toc-outcome"
         label="Outcome"
-        title="From exploration to direction"
+        title="AI as a layer, not the foundation"
         body="The designs earned support to move forward. But the bigger shift wasn't in the product. It was in how the team thought about AI. The process kept coming back to the same point: AI only works when the basics work first. By the end, that framing had stuck."
         highlights={[
           { icon: "stack", title: "AI as a layer, not the foundation.", body: "The process made one thing clear: direct control has to come first. AI works best when it sits on top of that, not as a replacement for it." },
@@ -1166,7 +1171,7 @@ function FmeAnnotationBody() {
         cover="/AnnotationVid.mp4"
         specs={[
           { label: "Role", value: "Product Design Intern" },
-          { label: "Team", value: "4 Members" },
+          { label: "Scope", value: "Feature Redesign (Annotation)" },
           { label: "Duration", value: "April – August 2024" },
         ]}
         intro="During my internship at Safe Software, I led the end-to-end redesign of the annotation experience in FME Form, a visual, no-code platform for building data integration and spatial workflows. Users build workflows by dragging and connecting transformers on a canvas, each one a step like reading, filtering, or reshaping data, and a single workflow can grow to hundreds of transformers deep. Of everything on the table, I chose to focus on annotation: the notes users rely on to keep that complexity legible."
