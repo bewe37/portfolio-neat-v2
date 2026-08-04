@@ -6,6 +6,7 @@ import SharedNav from "@/components/SharedNav"
 import MobileMenu from "@/components/MobileMenu"
 import { Geist, Playfair_Display, Gabriela } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Analytics } from '@vercel/analytics/next';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-serif', display: 'swap' });
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SharedNav />
         <MobileMenu />
         <PageTransition>{children}</PageTransition>
+        <Analytics />
       </body>
     </html>
   )
